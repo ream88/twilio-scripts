@@ -1,4 +1,4 @@
-# twilio-helpers
+# twilio-scripts
 
 A compilation of useful Elixir scripts for working with Twilio resources.
 
