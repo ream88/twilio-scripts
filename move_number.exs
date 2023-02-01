@@ -1,3 +1,5 @@
+#!/usr/bin/env elixir
+
 Mix.install([
   {:req, "~> 0.3.4"}
 ])
