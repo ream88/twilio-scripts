@@ -36,8 +36,7 @@ defmodule MoveNumber do
         auth: auth
       )
     else
-      IO.puts("Aborted!")
-      System.halt(1)
+      abort!()
     end
   end
 end

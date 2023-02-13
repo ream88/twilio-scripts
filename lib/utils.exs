@@ -16,4 +16,9 @@ defmodule Utils do
     |> String.downcase() ==
       "y"
   end
+
+  def abort!(message \\ "Aborted!") do
+    IO.puts(message)
+    System.halt(1)
+  end
 end
