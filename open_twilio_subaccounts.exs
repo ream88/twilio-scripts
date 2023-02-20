@@ -17,11 +17,17 @@ defmodule OpenTwilioSubaccounts do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> Flow.from_enumerable()
-    |> Flow.map(fn %{"sid" => account_sid} ->
-      update_resource("/2010-04-01/Accounts/#{account_sid}.json",
-        form: [Status: "active"],
-        auth: auth
-      )
+    |> Flow.map(fn
+      %{"sid" => account_sid, "status" => "suspended"} ->
+        update_resource("/2010-04-01/Accounts/#{account_sid}.json",
+          form: [Status: "active"],
+          auth: auth
+        )
+
+        IO.puts("#{account_sid} reopended")
+
+      %{"sid" => account_sid} ->
+        IO.puts("#{account_sid} ignored")
     end)
     |> Flow.run()
   end
