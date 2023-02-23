@@ -8,7 +8,7 @@ Mix.install([
 Code.require_file("./lib/resources.exs")
 Code.require_file("./lib/utils.exs")
 
-defmodule SuspendTwilioSubaccounts do
+defmodule SuspendActiveTwilioSubaccounts do
   import Resources
   import Utils
 
@@ -17,14 +17,18 @@ defmodule SuspendTwilioSubaccounts do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> Flow.from_enumerable()
-    |> Flow.map(fn %{"sid" => account_sid} ->
-      update_resource("/2010-04-01/Accounts/#{account_sid}.json",
-        form: [Status: "suspended"],
-        auth: auth
-      )
+    |> Flow.map(fn
+      %{"sid" => account_sid, "status" => "active"} ->
+        update_resource("/2010-04-01/Accounts/#{account_sid}.json",
+          form: [Status: "suspended"],
+          auth: auth
+        )
+
+      _ ->
+        nil
     end)
     |> Flow.run()
   end
 end
 
-SuspendTwilioSubaccounts.run()
+SuspendActiveTwilioSubaccounts.run()
