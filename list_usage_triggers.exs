@@ -17,6 +17,7 @@ defmodule ListUsageTriggers do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> Flow.from_enumerable()
+    |> Flow.reject(&(&1["status"] == "closed"))
     |> Flow.map(fn %{"sid" => account_sid} ->
       case fetch_resources(
              "usage_triggers",
@@ -29,7 +30,7 @@ defmodule ListUsageTriggers do
         usage_triggers ->
           Enum.each(usage_triggers, fn usage_trigger ->
             usage_trigger
-            |> Map.take(["usage_category", "trigger_by", "trigger_value", "current_value"])
+            |> Map.take(["usage_category", "trigger_by", "trigger_value", "current_value", "callback_url"])
             |> IO.inspect(label: account_sid)
           end)
       end

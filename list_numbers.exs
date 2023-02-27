@@ -17,6 +17,7 @@ defmodule ListNumbers do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> Flow.from_enumerable()
+    |> Flow.reject(&(&1["status"] == "closed"))
     |> Flow.flat_map(fn %{"sid" => account_sid} ->
       fetch_resources(
         "incoming_phone_numbers",

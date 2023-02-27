@@ -17,15 +17,13 @@ defmodule CloseSuspendedTwilioSubaccounts do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> Flow.from_enumerable()
+    |> Flow.filter(&(&1["status"] == "suspended"))
     |> Flow.map(fn
-      %{"sid" => account_sid, "status" => "suspended"} ->
+      %{"sid" => account_sid} ->
         update_resource("/2010-04-01/Accounts/#{account_sid}.json",
           form: [Status: "closed"],
           auth: auth
         )
-
-      _ ->
-        nil
     end)
     |> Flow.run()
   end

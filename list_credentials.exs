@@ -17,7 +17,7 @@ defmodule ListCredentials do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> Flow.from_enumerable()
-    |> Flow.filter(&(&1["status"] == "active"))
+    |> Flow.reject(&(&1["status"] == "closed"))
     |> Flow.map(fn %{"sid" => account_sid, "auth_token" => auth_token} ->
       fetch_resources(
         "credentials",
