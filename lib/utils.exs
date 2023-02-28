@@ -21,4 +21,8 @@ defmodule Utils do
     IO.puts(message)
     System.halt(1)
   end
+
+  def red(message) do
+    IO.ANSI.red() <> message <> IO.ANSI.reset()
+  end
 end

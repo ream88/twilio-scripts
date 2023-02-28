@@ -27,8 +27,16 @@ defmodule Resources do
     Req.get!(base_url(opts) <> uri, opts)
   end
 
+  def create_resource(uri, opts) do
+    Req.post!(base_url(opts) <> uri, opts)
+  end
+
   def update_resource(uri, opts) do
     Req.post!(base_url(opts) <> uri, opts)
+  end
+
+  def delete_resource(uri, opts) do
+    Req.delete!(base_url(opts) <> uri, opts)
   end
 
   defp base_url(opts) do
