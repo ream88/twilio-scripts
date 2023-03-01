@@ -16,6 +16,7 @@ defmodule SuspendActiveTwilioSubaccounts do
     auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
+    |> filter_master_account()
     |> Flow.from_enumerable()
     |> Flow.map(fn
       %{"sid" => account_sid, "status" => "active"} ->
