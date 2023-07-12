@@ -95,7 +95,10 @@ defmodule GenerateTwilioCallPricesTable do
 
       """
       INSERT INTO twilio_call_prices(country, destination, from_eea, price, price_in_cents, price_in_credits, prefix, organization_id)
-        VALUES (E'#{country}', $$#{destination}$$, #{from_eea}, #{price}, #{price_in_cents}, #{price_in_credits}, E'#{prefix}', NULL);
+        VALUES (E'#{country}', $$#{destination}$$, #{from_eea}, #{price}, #{price_in_cents}, #{price_in_credits}, E'#{prefix}', NULL)
+        ON CONFLICT (country, from_eea, prefix)
+        DO
+          UPDATE SET price = EXCLUDED.price, price_in_cents = EXCLUDED.price_in_cents, price_in_credits = EXCLUDED.price_in_credits;
       """
     end)
     |> Flow.stream()
