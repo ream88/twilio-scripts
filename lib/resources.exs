@@ -1,3 +1,5 @@
+Code.require_file(Path.expand("./custom_cache.exs", __DIR__))
+
 defmodule Resources do
   @base_url "https://api.twilio.com"
 
@@ -10,7 +12,10 @@ defmodule Resources do
   end
 
   def fetch_resources(rest, name, uri, opts) do
-    case Req.get!(base_url(opts) <> uri, opts) do
+    Req.new(url: base_url(opts) <> uri)
+    |> CustomCache.attach(opts)
+    |> Req.get!()
+    |> case do
       %{body: %{^name => resources, "next_page_uri" => uri}} ->
         fetch_resources(rest ++ resources, name, uri, opts)
 
@@ -18,8 +23,8 @@ defmodule Resources do
         fetch_resources(rest ++ resources, name, nil, opts)
 
       %{body: %{^name => resources, "meta" => %{"next_page_url" => url}}} ->
-        %{path: uri} = URI.parse(url)
-        fetch_resources(rest ++ resources, name, uri, opts)
+        %{path: uri, query: query} = URI.parse(url)
+        fetch_resources(rest ++ resources, name, uri <> "?" <> query, opts)
     end
   end
 
