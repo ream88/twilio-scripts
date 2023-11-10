@@ -8,12 +8,16 @@ defmodule CustomCache do
   """
   require Logger
 
-  def attach(%Req.Request{} = request, options \\ []) do
-    request
-    |> Req.Request.register_options([:custom_cache_dir])
-    |> Req.Request.merge_options(options)
-    |> Req.Request.append_request_steps(custom_cache: &request_local_cache_step/1)
-    |> Req.Request.prepend_response_steps(custom_cache: &response_local_cache_step/1)
+  def attach(%Req.Request{} = request, opts \\ []) do
+    if Keyword.get(opts, :custom_cache_dir, false) do
+      request
+      |> Req.Request.register_options([:custom_cache_dir])
+      |> Req.Request.merge_options(opts)
+      |> Req.Request.append_request_steps(custom_cache: &request_local_cache_step/1)
+      |> Req.Request.prepend_response_steps(custom_cache: &response_local_cache_step/1)
+    else
+      request
+    end
   end
 
   def request_local_cache_step(request) do

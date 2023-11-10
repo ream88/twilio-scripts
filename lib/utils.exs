@@ -26,7 +26,7 @@ defmodule Utils do
     IO.ANSI.red() <> message <> IO.ANSI.reset()
   end
 
-  def filter_master_account(accounts) do
+  def reject_master_account(accounts) do
     Enum.reject(accounts, &(Map.fetch!(&1, "sid") == Map.fetch!(&1, "owner_account_sid")))
   end
 end

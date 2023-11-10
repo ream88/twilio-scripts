@@ -14,7 +14,7 @@ defmodule Resources do
   def fetch_resources(rest, name, uri, opts) do
     Req.new(url: base_url(opts) <> uri)
     |> CustomCache.attach(opts)
-    |> Req.get!()
+    |> Req.get!(opts)
     |> case do
       %{body: %{^name => resources, "next_page_uri" => uri}} ->
         fetch_resources(rest ++ resources, name, uri, opts)
