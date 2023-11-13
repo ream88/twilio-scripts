@@ -6,7 +6,7 @@ Mix.install([
 
 Code.require_file("./lib/utils.exs")
 
-defmodule UpdateNumberToUseTwimlApp do
+defmodule UpdatePhoneNumberToUseTwimlApp do
   import Utils
 
   def run() do
@@ -29,4 +29,4 @@ defmodule UpdateNumberToUseTwimlApp do
   end
 end
 
-UpdateNumberToUseTwimlApp.run()
+UpdatePhoneNumberToUseTwimlApp.run()

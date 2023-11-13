@@ -21,7 +21,7 @@ defmodule ReplaceUsageTriggers do
     usage_category = get_env("CB_USAGE_CATEGORY")
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
-    |> filter_master_account()
+    |> reject_master_account()
     |> Flow.from_enumerable()
     |> Flow.reject(&(&1["status"] == "closed"))
     |> Flow.map(fn %{"sid" => account_sid} ->
@@ -38,7 +38,7 @@ defmodule ReplaceUsageTriggers do
         form: [
           CallbackMethod: "POST",
           CallbackUrl: callback_url <> "?sub_account_sid=" <> account_sid,
-          FriendlyName: "Daily Circuit Breaker",
+          FriendlyName: "Circuit Breaker",
           Recurring: recurring,
           TriggerBy: trigger_by,
           TriggerValue: trigger_value,
@@ -46,6 +46,8 @@ defmodule ReplaceUsageTriggers do
         ],
         auth: auth
       )
+
+      IO.write(".")
     end)
     |> Flow.run()
   end

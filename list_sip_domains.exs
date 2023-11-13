@@ -8,30 +8,29 @@ Mix.install([
 Code.require_file("./lib/resources.exs")
 Code.require_file("./lib/utils.exs")
 
-defmodule CloseSuspendedTwilioSubaccounts do
+defmodule ListSIPDomains do
   import Resources
   import Utils
 
   def run() do
     auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
 
-    unless ask("This will close all suspended subaccounts. #{red("This can't be undone!")} Continue?") do
-      abort!()
-    end
-
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> reject_master_account()
     |> Flow.from_enumerable()
-    |> Flow.filter(&(&1["status"] == "suspended"))
-    |> Flow.map(fn
-      %{"sid" => account_sid} ->
-        update_resource("/2010-04-01/Accounts/#{account_sid}.json",
-          form: [Status: "closed"],
-          auth: auth
-        )
+    |> Flow.reject(&(&1["status"] == "closed"))
+    |> Flow.flat_map(fn %{"sid" => account_sid} ->
+      fetch_resources(
+        "domains",
+        "/2010-04-01/Accounts/#{account_sid}/SIP/Domains.json",
+        auth: auth
+      )
+    end)
+    |> Flow.map(fn %{"sid" => sid, "account_sid" => account_sid} = properties ->
+      IO.inspect(properties["voice_url"], label: "#{sid} in #{account_sid}")
     end)
     |> Flow.run()
   end
 end
 
-CloseSuspendedTwilioSubaccounts.run()
+ListSIPDomains.run()

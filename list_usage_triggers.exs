@@ -12,14 +12,22 @@ defmodule ListUsageTriggers do
   import Resources
   import Utils
 
-  def run() do
+  def run([]) do
     auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
-    |> filter_master_account()
+    |> reject_master_account()
+    |> Enum.reject(&(&1["status"] == "closed"))
+    |> Enum.map(& &1["sid"])
+    |> run()
+  end
+
+  def run(account_sids) do
+    auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
+
+    account_sids
     |> Flow.from_enumerable()
-    |> Flow.reject(&(&1["status"] == "closed"))
-    |> Flow.map(fn %{"sid" => account_sid} ->
+    |> Flow.map(fn account_sid ->
       case fetch_resources(
              "usage_triggers",
              "/2010-04-01/Accounts/#{account_sid}/Usage/Triggers.json",
@@ -31,7 +39,14 @@ defmodule ListUsageTriggers do
         usage_triggers ->
           Enum.each(usage_triggers, fn usage_trigger ->
             usage_trigger
-            |> Map.take(["usage_category", "trigger_by", "trigger_value", "current_value", "callback_url"])
+            |> Map.take([
+              "usage_category",
+              "trigger_by",
+              "trigger_value",
+              "current_value",
+              "callback_url",
+              "recurring"
+            ])
             |> IO.inspect(label: account_sid)
           end)
       end
@@ -40,4 +55,4 @@ defmodule ListUsageTriggers do
   end
 end
 
-ListUsageTriggers.run()
+ListUsageTriggers.run(System.argv())

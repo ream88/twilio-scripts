@@ -8,7 +8,7 @@ Mix.install([
 Code.require_file("./lib/resources.exs")
 Code.require_file("./lib/utils.exs")
 
-defmodule OpenSuspendedTwilioSubaccounts do
+defmodule CountAccounts do
   import Resources
   import Utils
 
@@ -17,17 +17,9 @@ defmodule OpenSuspendedTwilioSubaccounts do
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
     |> reject_master_account()
-    |> Flow.from_enumerable()
-    |> Flow.filter(&(&1["status"] == "suspended"))
-    |> Flow.map(fn
-      %{"sid" => account_sid} ->
-        update_resource("/2010-04-01/Accounts/#{account_sid}.json",
-          form: [Status: "active"],
-          auth: auth
-        )
-    end)
-    |> Flow.run()
+    |> Enum.count()
+    |> IO.inspect(label: "Count of accounts")
   end
 end
 
-OpenSuspendedTwilioSubaccounts.run()
+CountAccounts.run()

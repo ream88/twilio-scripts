@@ -16,7 +16,7 @@ defmodule CountNumbers do
     auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
-    |> filter_master_account()
+    |> reject_master_account()
     |> Flow.from_enumerable()
     |> Flow.reduce(fn -> 0 end, fn %{"sid" => account_sid}, acc ->
       count =

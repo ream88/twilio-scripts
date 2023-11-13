@@ -15,8 +15,12 @@ defmodule SuspendActiveTwilioSubaccounts do
   def run() do
     auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
 
+    unless ask("This will suspend all subaccounts. Continue?") do
+      abort!()
+    end
+
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
-    |> filter_master_account()
+    |> reject_master_account()
     |> Flow.from_enumerable()
     |> Flow.map(fn
       %{"sid" => account_sid, "status" => "active"} ->

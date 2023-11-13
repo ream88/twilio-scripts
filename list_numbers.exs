@@ -16,7 +16,7 @@ defmodule ListNumbers do
     auth = {get_env("TWILIO_ACCOUNT_SID"), get_env("TWILIO_AUTH_TOKEN")}
 
     fetch_resources("accounts", "/2010-04-01/Accounts.json", auth: auth)
-    |> filter_master_account()
+    |> reject_master_account()
     |> Flow.from_enumerable()
     |> Flow.reject(&(&1["status"] == "closed"))
     |> Flow.flat_map(fn %{"sid" => account_sid} ->
@@ -27,7 +27,9 @@ defmodule ListNumbers do
       )
     end)
     |> Flow.map(fn %{"sid" => phone_number_sid, "account_sid" => account_sid} = properties ->
-      IO.inspect(properties["voice_application_sid"], label: "#{phone_number_sid} in #{account_sid}")
+      IO.inspect(properties["voice_application_sid"],
+        label: "#{properties["phone_number"]} (#{phone_number_sid}) in #{account_sid}"
+      )
     end)
     |> Flow.run()
   end
